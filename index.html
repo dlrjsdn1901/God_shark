@@ -1,0 +1,638 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>급식 정보 웹앱</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.37);
+      --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.2);
+      --text-primary: #2d3748;
+      --text-secondary: #4a5568;
+      --text-light: rgba(255, 255, 255, 0.9);
+      --accent: #4299e1;
+      --success: #48bb78;
+      --warning: #ed8936;
+      --danger: #e53e3e;
+      --border-radius: 20px;
+      --border-radius-sm: 12px;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--primary-gradient);
+      min-height: 100vh;
+      padding: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 105, 180, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(64, 153, 255, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(72, 187, 120, 0.3) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .header h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      letter-spacing: -0.02em;
+    }
+
+    .header p {
+      font-size: 1.2rem;
+      color: var(--text-light);
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .main-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .date-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .date-input-wrapper {
+      position: relative;
+    }
+
+    .date-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+    }
+
+    .date-input {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: var(--border-radius-sm);
+      font-size: 1rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--text-primary);
+    }
+
+    .date-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .search-btn {
+      background: var(--secondary-gradient);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: var(--border-radius-sm);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(245, 87, 108, 0.3);
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .search-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .search-btn:hover::before {
+      left: 100%;
+    }
+
+    .search-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(245, 87, 108, 0.4);
+    }
+
+    .search-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .search-btn:disabled {
+      background: rgba(255, 255, 255, 0.3);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-primary);
+      display: none;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .meal-info {
+      display: none;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .meal-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: var(--border-radius-sm);
+      backdrop-filter: blur(10px);
+    }
+
+    .meal-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+      animation: slideInLeft 0.6s ease-out;
+    }
+
+    .meal-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .meal-type {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(66, 153, 225, 0.2);
+    }
+
+    .meal-type::before {
+      content: "🍽️";
+      font-size: 1.8rem;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0 1rem 0;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .menu-section .section-title {
+      color: var(--accent);
+    }
+
+    .calorie-section .section-title {
+      color: var(--warning);
+    }
+
+    .nutrition-section .section-title {
+      color: var(--success);
+    }
+
+    .info-box {
+      padding: 1.25rem;
+      border-radius: var(--border-radius-sm);
+      backdrop-filter: blur(5px);
+      border-left: 4px solid;
+      margin-bottom: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .info-box:hover {
+      transform: translateX(5px);
+    }
+
+    .menu-box {
+      background: rgba(66, 153, 225, 0.1);
+      border-left-color: var(--accent);
+    }
+
+    .calorie-box {
+      background: rgba(237, 137, 54, 0.1);
+      border-left-color: var(--warning);
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .nutrition-box {
+      background: rgba(72, 187, 120, 0.1);
+      border-left-color: var(--success);
+    }
+
+    .menu-item, .nutrition-item {
+      padding: 0.5rem 0;
+      color: var(--text-secondary);
+      font-weight: 500;
+      line-height: 1.6;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .menu-item:last-child, .nutrition-item:last-child {
+      border-bottom: none;
+    }
+
+    .error, .no-data {
+      text-align: center;
+      padding: 2.5rem;
+      border-radius: var(--border-radius);
+      display: none;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .error {
+      background: rgba(229, 62, 62, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(229, 62, 62, 0.2);
+    }
+
+    .no-data {
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-secondary);
+      backdrop-filter: blur(10px);
+    }
+
+    .no-data::before {
+      content: "😔";
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .main-card {
+        padding: 1.5rem;
+        margin: 1rem 0;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+      }
+
+      .meal-card {
+        padding: 1.5rem;
+      }
+
+      .meal-type {
+        font-size: 1.3rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .header p {
+        font-size: 1rem;
+      }
+
+      .main-card {
+        padding: 1.25rem;
+      }
+
+      .meal-card {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍽️ 급식 정보 made by 이건우
+    </h1>
+      <p>원하는 날짜의 급식 메뉴를 확인하세요</p>
+    </div>
+
+    <div class="main-card">
+      <div class="date-selector">
+        <div class="date-input-wrapper">
+          <label class="date-label" for="mealDate">📅 날짜 선택</label>
+          <input type="date" id="mealDate" class="date-input" />
+        </div>
+        <button class="search-btn" onclick="searchMeal()">급식 정보 조회</button>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>급식 정보를 가져오는 중...</p>
+      </div>
+
+      <div class="error" id="error"></div>
+      
+      <div class="no-data" id="noData">
+        <p>해당 날짜에 급식 정보가 없습니다.</p>
+      </div>
+
+      <div class="meal-info" id="mealInfo"></div>
+    </div>
+  </div>
+
+  <script>
+    // 페이지 로드 시 오늘 날짜로 설정
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date();
+      const dateString = today.toISOString().split('T')[0];
+      document.getElementById('mealDate').value = dateString;
+    });
+
+    async function searchMeal() {
+      const dateInput = document.getElementById('mealDate');
+      const selectedDate = dateInput.value;
+      
+      if (!selectedDate) {
+        alert('날짜를 선택해주세요.');
+        return;
+      }
+
+      // UI 상태 초기화
+      showLoading();
+      hideError();
+      hideMealInfo();
+      hideNoData();
+
+      try {
+        const formattedDate = selectedDate.replace(/-/g, '');
+        const apiUrl = `https://open.neis.go.kr/hub/mealServiceDietInfo?ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7679111&MLSV_YMD=${formattedDate}&Type=xml`;
+        
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const xmlText = await response.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+        
+        // 에러 체크
+        const errorElement = xmlDoc.querySelector('RESULT CODE');
+        if (errorElement && errorElement.textContent !== 'INFO-000') {
+          const errorMsg = xmlDoc.querySelector('RESULT MESSAGE');
+          throw new Error(errorMsg ? errorMsg.textContent : '데이터를 찾을 수 없습니다.');
+        }
+
+        const mealData = xmlDoc.querySelectorAll('row');
+        
+        if (mealData.length === 0) {
+          showNoData();
+          return;
+        }
+
+        displayMealInfo(mealData, selectedDate);
+        
+      } catch (error) {
+        console.error('Error fetching meal data:', error);
+        showError(error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function displayMealInfo(mealData, date) {
+      const mealInfo = document.getElementById('mealInfo');
+      const mealTypes = {
+        '1': '조식',
+        '2': '중식', 
+        '3': '석식'
+      };
+
+      let html = `<div class="meal-title">${formatDate(date)} 급식 정보</div>`;
+
+      Array.from(mealData).forEach((meal, index) => {
+        const mealCode = meal.querySelector('MMEAL_SC_CODE')?.textContent || '';
+        const mealType = mealTypes[mealCode] || '급식';
+        const dishName = meal.querySelector('DDISH_NM')?.textContent || '';
+        const calorie = meal.querySelector('CAL_INFO')?.textContent || '';
+        const nutrition = meal.querySelector('NTR_INFO')?.textContent || '';
+        
+        if (dishName) {
+          // HTML 태그 제거 및 메뉴 정리
+          const cleanDishName = dishName
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]*>/g, '')
+            .replace(/\([^)]*\)/g, '')
+            .trim();
+
+          const menuItems = cleanDishName.split('\n').filter(item => item.trim());
+
+          // 영양정보 파싱 및 정리
+          let nutritionDisplay = '';
+          if (nutrition) {
+            const cleanNutrition = nutrition
+              .replace(/<br\s*\/?>/gi, '\n')
+              .replace(/<[^>]*>/g, '')
+              .trim();
+            const nutritionItems = cleanNutrition.split('\n').filter(item => item.trim());
+            nutritionDisplay = nutritionItems.map(item => `<div class="nutrition-item">• ${item.trim()}</div>`).join('');
+          }
+
+          html += `
+            <div class="meal-card" style="animation-delay: ${index * 0.1}s">
+              <div class="meal-type">${mealType}</div>
+              
+              <div class="menu-section">
+                <div class="section-title">📋 메뉴</div>
+                <div class="info-box menu-box">
+                  ${menuItems.map(item => `<div class="menu-item">• ${item.trim()}</div>`).join('')}
+                </div>
+              </div>
+
+              ${calorie ? `
+                <div class="calorie-section">
+                  <div class="section-title">🔥 칼로리</div>
+                  <div class="info-box calorie-box">${calorie}</div>
+                </div>
+              ` : ''}
+
+              ${nutritionDisplay ? `
+                <div class="nutrition-section">
+                  <div class="section-title">🥗 영양정보</div>
+                  <div class="info-box nutrition-box">
+                    ${nutritionDisplay}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+      });
+
+      mealInfo.innerHTML = html;
+      showMealInfo();
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+      const weekday = weekdays[date.getDay()];
+      
+      return `${year}년 ${month}월 ${day}일 (${weekday})`;
+    }
+
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function showError(message) {
+      const errorElement = document.getElementById('error');
+      errorElement.textContent = `오류: ${message}`;
+      errorElement.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('error').style.display = 'none';
+    }
+
+    function showMealInfo() {
+      document.getElementById('mealInfo').style.display = 'block';
+    }
+
+    function hideMealInfo() {
+      document.getElementById('mealInfo').style.display = 'none';
+    }
+
+    function showNoData() {
+      document.getElementById('noData').style.display = 'block';
+    }
+
+    function hideNoData() {
+      document.getElementById('noData').style.display = 'none';
+    }
+
+    // Enter 키로 검색
+    document.getElementById('mealDate').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchMeal();
+      }
+    });
+  </script>
+</body>
+</html>
